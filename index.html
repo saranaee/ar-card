@@ -68,8 +68,11 @@ const start = async () => {
   const stream = await navigator.mediaDevices.getUserMedia({
     video: {
       facingMode: "environment",
-      focusMode: "manual"
-      
+      width: { ideal: 1920 },
+      height: { ideal: 1080 },
+      advanced: [
+        { focusMode: "continuous" }
+      ]
     },
     audio: false
   });
