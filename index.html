@@ -10,7 +10,7 @@
 <body>
 
 <a-scene
-  mindar-image="imageTargetSrc: targets.mind; smooth: true; smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 5;"
+  mindar-image="imageTargetSrc: targets.mind; smooth: true; smoothCount: 20; smoothTolerance: 0.01; smoothThreshold: 10; uiScanning: false; uiLoading: false; autoStart: true;"
   color-space="sRGB"
   embedded
   vr-mode-ui="enabled: false"
@@ -63,6 +63,19 @@ AFRAME.registerComponent('play-video-on-target', {
 });
 </script>
 
+<script>
+const start = async () => {
+  const stream = await navigator.mediaDevices.getUserMedia({
+    video: {
+      facingMode: "environment",
+      width: { ideal: 1920 },
+      height: { ideal: 1080 }
+    },
+    audio: false
+  });
+};
+start();
+</script>
   
 </body>
 </html>
