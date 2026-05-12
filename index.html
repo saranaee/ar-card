@@ -10,7 +10,7 @@
 <body>
 
 <a-scene
-  mindar-image="imageTargetSrc: targets.mind;"
+  mindar-image="imageTargetSrc: targets.mind; smooth: true; smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 5;"
   color-space="sRGB"
   embedded
   vr-mode-ui="enabled: false"
@@ -38,6 +38,7 @@
       width="1.6"
       height="2.3"
       position="0 0 0"
+      scale="1.6 2.3 1"
     ></a-video>
 
   </a-entity>
