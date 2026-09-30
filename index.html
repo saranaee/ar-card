@@ -1,0 +1,84 @@
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+</head>
+
+<body>
+
+<a-scene
+  mindar-image="imageTargetSrc: targets.mind; smooth: true; smoothCount: 50; smoothTolerance: 0.0003; smoothThreshold: 30; uiScanning: false; uiLoading: false; autoStart: true;"
+  color-space="sRGB"
+  embedded
+  vr-mode-ui="enabled: false"
+  device-orientation-permission-ui="enabled: false"
+>
+
+  <a-assets>
+    <video
+      id="video"
+      src="video.mp4"
+      
+      loop
+      muted
+      playsinline
+      webkit-playsinline
+    ></video>
+  </a-assets>
+
+  <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+  <a-entity mindar-image-target="targetIndex: 0" play-video-on-target>
+
+    <a-video
+      src="#video"
+      width="1.1"
+      height="1.58"
+      position="0 0 0"
+      material="shader: flat"
+      rotation="0 0 0"
+    ></a-video>
+
+  </a-entity>
+
+</a-scene>
+
+  
+<script>
+AFRAME.registerComponent('play-video-on-target', {
+  init: function () {
+    const video = document.querySelector("#video");
+
+    this.el.addEventListener("targetFound", () => {
+      video.play();
+    });
+
+    this.el.addEventListener("targetLost", () => {
+      video.pause();
+    });
+  }
+});
+</script>
+
+<script>
+const start = async () => {
+  const stream = await navigator.mediaDevices.getUserMedia({
+    video: {
+      facingMode: "environment",
+      width: { ideal: 1920 },
+      height: { ideal: 1080 },
+      advanced: [
+        { focusMode: "continuous" }
+      ]
+    },
+    audio: false
+  });
+};
+start();
+</script>
+  
+</body>
+</html>
