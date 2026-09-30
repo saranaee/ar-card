@@ -58,7 +58,11 @@ import { MindARThree } from "mindar-image-three";
 
 const mindarThree = new MindARThree({
   container: document.querySelector("#container"),
-  imageTargetSrc: "targets.mind"
+  imageTargetSrc: "targets.mind",
+
+  // Tracking filter
+  filterMinCF: 0.001,
+  filterBeta: 0.001
 });
 
 const { renderer, scene, camera } = mindarThree;
@@ -73,6 +77,7 @@ const video = document.querySelector("#video");
 const videoTexture = new THREE.VideoTexture(video);
 
 videoTexture.colorSpace = THREE.SRGBColorSpace;
+
 videoTexture.minFilter = THREE.LinearFilter;
 videoTexture.magFilter = THREE.LinearFilter;
 videoTexture.generateMipmaps = false;
@@ -95,36 +100,12 @@ const videoPlane = new THREE.Mesh(
 
 
 // =========================
-// MINDAR TARGET
+// TARGET
 // =========================
 
 const anchor = mindarThree.addAnchor(0);
 
-
-// =========================
-// SMOOTH GROUP
-// =========================
-
-// این گروه حرکت واقعی MindAR را دریافت می‌کند
-// ولی با تأخیر بسیار کم و نرم دنبال آن حرکت می‌کند.
-
-const smoothGroup = new THREE.Group();
-
-scene.add(smoothGroup);
-
-smoothGroup.add(videoPlane);
-
-
-// =========================
-// SMOOTHING SETTINGS
-// =========================
-
-// عدد بزرگ‌تر = سریع‌تر و نزدیک‌تر به tracking واقعی
-// عدد کوچک‌تر = نرم‌تر ولی با lag بیشتر
-
-const positionSmooth = 0.18;
-const rotationSmooth = 0.18;
-const scaleSmooth = 0.18;
+anchor.group.add(videoPlane);
 
 
 // =========================
@@ -133,22 +114,10 @@ const scaleSmooth = 0.18;
 
 anchor.onTargetFound = () => {
   video.play();
-
-  // هنگام پیدا شدن تارگت، اولین موقعیت را
-  // مستقیماً می‌گیریم تا ویدئو از جای اشتباه شروع نشود.
-
-  smoothGroup.position.copy(anchor.group.position);
-  smoothGroup.quaternion.copy(anchor.group.quaternion);
-  smoothGroup.scale.copy(anchor.group.scale);
-
-  smoothGroup.visible = true;
 };
-
 
 anchor.onTargetLost = () => {
   video.pause();
-
-  smoothGroup.visible = false;
 };
 
 
@@ -161,40 +130,6 @@ const start = async () => {
   await mindarThree.start();
 
   renderer.setAnimationLoop(() => {
-
-    // -------------------------
-    // POSITION SMOOTHING
-    // -------------------------
-
-    smoothGroup.position.lerp(
-      anchor.group.position,
-      positionSmooth
-    );
-
-
-    // -------------------------
-    // ROTATION SMOOTHING
-    // -------------------------
-
-    smoothGroup.quaternion.slerp(
-      anchor.group.quaternion,
-      rotationSmooth
-    );
-
-
-    // -------------------------
-    // SCALE SMOOTHING
-    // -------------------------
-
-    smoothGroup.scale.lerp(
-      anchor.group.scale,
-      scaleSmooth
-    );
-
-
-    // -------------------------
-    // RENDER
-    // -------------------------
 
     renderer.render(scene, camera);
 
