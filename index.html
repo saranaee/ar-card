@@ -7,7 +7,6 @@
   {
     "imports": {
       "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
       "mindar-image-three": "https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-three.prod.js"
     }
   }
@@ -28,8 +27,6 @@
       overflow: hidden;
     }
 
-    /* فقط ویدیوی خودمان را مخفی می‌کنیم،
-       نه ویدیوی دوربین MindAR */
     #video {
       display: none;
     }
@@ -55,9 +52,9 @@ import * as THREE from "three";
 import { MindARThree } from "mindar-image-three";
 
 
-// -------------------------
+// =========================
 // MINDAR
-// -------------------------
+// =========================
 
 const mindarThree = new MindARThree({
   container: document.querySelector("#container"),
@@ -67,9 +64,9 @@ const mindarThree = new MindARThree({
 const { renderer, scene, camera } = mindarThree;
 
 
-// -------------------------
+// =========================
 // VIDEO
-// -------------------------
+// =========================
 
 const video = document.querySelector("#video");
 
@@ -81,9 +78,9 @@ videoTexture.magFilter = THREE.LinearFilter;
 videoTexture.generateMipmaps = false;
 
 
-// -------------------------
+// =========================
 // VIDEO PLANE
-// -------------------------
+// =========================
 
 const geometry = new THREE.PlaneGeometry(1.1, 1.58);
 
@@ -97,38 +94,110 @@ const videoPlane = new THREE.Mesh(
 );
 
 
-// -------------------------
-// TARGET
-// -------------------------
+// =========================
+// MINDAR TARGET
+// =========================
 
 const anchor = mindarThree.addAnchor(0);
 
-anchor.group.add(videoPlane);
+
+// =========================
+// SMOOTH GROUP
+// =========================
+
+// این گروه حرکت واقعی MindAR را دریافت می‌کند
+// ولی با تأخیر بسیار کم و نرم دنبال آن حرکت می‌کند.
+
+const smoothGroup = new THREE.Group();
+
+scene.add(smoothGroup);
+
+smoothGroup.add(videoPlane);
 
 
-// -------------------------
+// =========================
+// SMOOTHING SETTINGS
+// =========================
+
+// عدد بزرگ‌تر = سریع‌تر و نزدیک‌تر به tracking واقعی
+// عدد کوچک‌تر = نرم‌تر ولی با lag بیشتر
+
+const positionSmooth = 0.18;
+const rotationSmooth = 0.18;
+const scaleSmooth = 0.18;
+
+
+// =========================
 // TARGET EVENTS
-// -------------------------
+// =========================
 
 anchor.onTargetFound = () => {
   video.play();
+
+  // هنگام پیدا شدن تارگت، اولین موقعیت را
+  // مستقیماً می‌گیریم تا ویدئو از جای اشتباه شروع نشود.
+
+  smoothGroup.position.copy(anchor.group.position);
+  smoothGroup.quaternion.copy(anchor.group.quaternion);
+  smoothGroup.scale.copy(anchor.group.scale);
+
+  smoothGroup.visible = true;
 };
+
 
 anchor.onTargetLost = () => {
   video.pause();
+
+  smoothGroup.visible = false;
 };
 
 
-// -------------------------
+// =========================
 // START
-// -------------------------
+// =========================
 
 const start = async () => {
 
   await mindarThree.start();
 
   renderer.setAnimationLoop(() => {
+
+    // -------------------------
+    // POSITION SMOOTHING
+    // -------------------------
+
+    smoothGroup.position.lerp(
+      anchor.group.position,
+      positionSmooth
+    );
+
+
+    // -------------------------
+    // ROTATION SMOOTHING
+    // -------------------------
+
+    smoothGroup.quaternion.slerp(
+      anchor.group.quaternion,
+      rotationSmooth
+    );
+
+
+    // -------------------------
+    // SCALE SMOOTHING
+    // -------------------------
+
+    smoothGroup.scale.lerp(
+      anchor.group.scale,
+      scaleSmooth
+    );
+
+
+    // -------------------------
+    // RENDER
+    // -------------------------
+
     renderer.render(scene, camera);
+
   });
 
 };
