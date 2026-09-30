@@ -7,6 +7,7 @@
   {
     "imports": {
       "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
       "mindar-image-three": "https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-three.prod.js"
     }
   }
@@ -27,6 +28,8 @@
       overflow: hidden;
     }
 
+    /* فقط ویدیوی خودمان را مخفی می‌کنیم،
+       نه ویدیوی دوربین MindAR */
     #video {
       display: none;
     }
@@ -52,40 +55,35 @@ import * as THREE from "three";
 import { MindARThree } from "mindar-image-three";
 
 
-// =========================
+// -------------------------
 // MINDAR
-// =========================
+// -------------------------
 
 const mindarThree = new MindARThree({
   container: document.querySelector("#container"),
-  imageTargetSrc: "targets.mind",
-
-  // Tracking filter
-  filterMinCF: 0.001,
-  filterBeta: 0.001
+  imageTargetSrc: "targets.mind"
 });
 
 const { renderer, scene, camera } = mindarThree;
 
 
-// =========================
+// -------------------------
 // VIDEO
-// =========================
+// -------------------------
 
 const video = document.querySelector("#video");
 
 const videoTexture = new THREE.VideoTexture(video);
 
 videoTexture.colorSpace = THREE.SRGBColorSpace;
-
 videoTexture.minFilter = THREE.LinearFilter;
 videoTexture.magFilter = THREE.LinearFilter;
 videoTexture.generateMipmaps = false;
 
 
-// =========================
+// -------------------------
 // VIDEO PLANE
-// =========================
+// -------------------------
 
 const geometry = new THREE.PlaneGeometry(1.1, 1.58);
 
@@ -99,18 +97,18 @@ const videoPlane = new THREE.Mesh(
 );
 
 
-// =========================
+// -------------------------
 // TARGET
-// =========================
+// -------------------------
 
 const anchor = mindarThree.addAnchor(0);
 
 anchor.group.add(videoPlane);
 
 
-// =========================
+// -------------------------
 // TARGET EVENTS
-// =========================
+// -------------------------
 
 anchor.onTargetFound = () => {
   video.play();
@@ -121,18 +119,16 @@ anchor.onTargetLost = () => {
 };
 
 
-// =========================
+// -------------------------
 // START
-// =========================
+// -------------------------
 
 const start = async () => {
 
   await mindarThree.start();
 
   renderer.setAnimationLoop(() => {
-
     renderer.render(scene, camera);
-
   });
 
 };
