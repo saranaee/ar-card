@@ -63,7 +63,9 @@ const mindarThree = new MindARThree({
   container: document.querySelector("#container"),
   imageTargetSrc: "targets.mind",
   warmupTolerance: 5,
-  missTolerance: 8
+  missTolerance: 8,
+  filterMinCF: 0.001,
+  filterBeta: 1
 });
 
 const { renderer, scene, camera } = mindarThree;
