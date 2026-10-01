@@ -75,9 +75,9 @@ const mindarThree = new MindARThree({
   scaleFilterMinCF: 0.001,
   scaleFilterBeta: 1000,
 
-  resolution: "1080p",
+  filterDCutOff: 0.0005,
 
-  targetFPS: 30
+  resolution: "1080p"
 });
 
 const { renderer, scene, camera } = mindarThree;
