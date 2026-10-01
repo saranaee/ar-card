@@ -61,7 +61,9 @@ import { MindARThree } from "mindar-image-three";
 
 const mindarThree = new MindARThree({
   container: document.querySelector("#container"),
-  imageTargetSrc: "targets.mind"
+  imageTargetSrc: "targets.mind",
+  warmupTolerance: 5,
+  missTolerance: 8
 });
 
 const { renderer, scene, camera } = mindarThree;
